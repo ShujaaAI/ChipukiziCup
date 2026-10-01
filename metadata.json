@@ -1,0 +1,6 @@
+{
+  "name": "Chipkizi Cup - Football Tournament Platform",
+  "description": "Premier international youth football tournament platform featuring live fixtures, standings, brackets, teams, and match analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
