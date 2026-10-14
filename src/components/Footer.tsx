@@ -9,9 +9,12 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
   return (
-    <footer className="w-full bg-[#070A0F] border-t border-white/10 text-slate-400">
+    <footer className="w-full bg-[#0B0F17] text-slate-400">
+      {/* Red accent divider stripe matching reference image */}
+      <div className="h-1.5 w-full bg-red-600" />
+
       {/* Sponsor Marquee Bar */}
-      <div className="border-b border-white/5 py-8 bg-slate-950/40">
+      <div className="border-b border-white/5 py-8 bg-slate-950/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="text-center md:text-left">
@@ -175,48 +178,34 @@ export const Footer: React.FC<FooterProps> = ({ onSelectTab }) => {
           </div>
         </div>
 
-        {/* Bottom Bar: Copyright & Socials */}
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-slate-500 text-center sm:text-left">
-            © {new Date().getFullYear()} Chipkizi Cup. Organized by Future Stars Academy (Arusha, Tanzania). 
-            All rights reserved.
+        {/* Bottom Bar: Quick links & Copyright matching reference image */}
+        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-slate-400 font-semibold">
+            <button onClick={() => onSelectTab('home')} className="hover:text-red-500 transition-colors cursor-pointer">
+              Home
+            </button>
+            <button onClick={() => onSelectTab('fixtures')} className="hover:text-red-500 transition-colors cursor-pointer">
+              Fixtures & Scores
+            </button>
+            <button onClick={() => onSelectTab('standings')} className="hover:text-red-500 transition-colors cursor-pointer">
+              Tables
+            </button>
+            <button onClick={() => onSelectTab('brackets')} className="hover:text-red-500 transition-colors cursor-pointer">
+              Brackets
+            </button>
+            <button onClick={() => onSelectTab('teams')} className="hover:text-red-500 transition-colors cursor-pointer">
+              Teams
+            </button>
+            <button onClick={() => onSelectTab('stats')} className="hover:text-red-500 transition-colors cursor-pointer">
+              Stats
+            </button>
+            <a href="https://chipkizicup.com" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+              Official Site
+            </a>
           </div>
 
-          {/* Social Icons */}
-          <div className="flex items-center gap-3">
-            <a
-              href="https://chipkizicup.com"
-              target="_blank"
-              rel="noreferrer"
-              className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-              aria-label="Official Website"
-            >
-              <Globe className="w-4 h-4" />
-            </a>
-            <a
-              href="#instagram"
-              onClick={(e) => e.preventDefault()}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-emerald-400 hover:bg-white/10 text-xs font-semibold tracking-wider transition-colors"
-              aria-label="Instagram"
-            >
-              IG
-            </a>
-            <a
-              href="#youtube"
-              onClick={(e) => e.preventDefault()}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-red-400 hover:bg-white/10 text-xs font-semibold tracking-wider transition-colors"
-              aria-label="YouTube"
-            >
-              YT
-            </a>
-            <a
-              href="#facebook"
-              onClick={(e) => e.preventDefault()}
-              className="px-2.5 py-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-blue-400 hover:bg-white/10 text-xs font-semibold tracking-wider transition-colors"
-              aria-label="Facebook"
-            >
-              FB
-            </a>
+          <div className="text-xs text-slate-500 font-medium">
+            Chipkizi Cup & Future Stars Academy © 2026. All Rights Reserved.
           </div>
         </div>
       </div>

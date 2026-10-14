@@ -1037,3 +1037,135 @@ export const SPONSORS = [
   { name: 'Azam TV', role: 'Official Broadcast', tier: 'Media' },
   { name: 'Arusha City Council', role: 'Civic Partner', tier: 'Patron' },
 ];
+
+export interface NewsArticle {
+  id: string;
+  title: string;
+  tag: string;
+  tagColor?: string;
+  date: string;
+  author: string;
+  readTime: string;
+  excerpt: string;
+  content: string;
+  image?: string;
+  category?: string;
+}
+
+export const HERO_FEATURE_MAIN: NewsArticle = {
+  id: 'hero-main-1',
+  title: 'CHIPKIZI CUP 2026: ARUSHA SET FOR 128-TEAM EAST AFRICAN SHOWDOWN',
+  tag: 'FA CUP / CHIPKIZI CUP',
+  date: 'June 17, 2026',
+  author: 'Rashid Khalfan',
+  readTime: '4 min read',
+  excerpt: 'The 15th edition kicks off across TGT Grounds and Sheikh Amri Abeid Stadium, bringing together the premier grassroots football academies from Tanzania, Kenya, Uganda, and Rwanda.',
+  content: 'Over 128 elite youth football clubs have landed in Arusha for the 2026 Chipkizi Cup. The competition features age groups from U9 to U20 for boys and girls, with international scouts from Europe and North Africa in attendance to identify the next generation of football stars.',
+};
+
+export const HERO_STACKED_ARTICLES: NewsArticle[] = [
+  {
+    id: 'hero-stack-1',
+    title: 'TANZANIA ACADEMIES IN TALKS WITH EUROPEAN SCOUTS FOR RECORD PROSPECTS',
+    tag: 'SCOUTING TALK',
+    date: 'June 30, 2026',
+    author: 'Michael Oduor',
+    readTime: '3 min read',
+    excerpt: 'Representatives from Belgium and France hold introductory evaluations with Future Stars Academy directors.',
+    content: 'Youth development leaders discuss talent exchange programs and European training camps for top tournament standouts.',
+  },
+  {
+    id: 'hero-stack-2',
+    title: 'MOUNT MERU DERBY: FUTURE STARS VS SIMBA YOUTH UNDER FLOODLIGHTS',
+    tag: 'MATCH PREVIEW',
+    tagColor: 'bg-red-600 text-white',
+    date: 'June 17, 2026',
+    author: 'Amina Saidi',
+    readTime: '2 min read',
+    excerpt: 'A historic rivalry reignites at Sheikh Amri Abeid Stadium with both sides chasing top seed in Group A.',
+    content: 'Full crowd expected as regional powerhouses go head-to-head in what coaches describe as the definitive group test.',
+  },
+  {
+    id: 'hero-stack-3',
+    title: 'EAST AFRICA TALENT WATCH: 5 GOLDEN BOOT CONTENDERS TO LIGHT UP TGT',
+    tag: 'PLAYER WATCH',
+    date: 'June 14, 2026',
+    author: 'David Mwangi',
+    readTime: '5 min read',
+    excerpt: 'Strikers from Nairobi, Kampala, and Dar es Salaam vie for the prestigious Uhlsport Golden Boot trophy.',
+    content: 'Scouting analysis on the most lethal finishers arriving in Arusha with tactical breakdown of their strengths.',
+  },
+];
+
+export const TOP_NEWS_ARTICLES: NewsArticle[] = [
+  {
+    id: 'top-news-1',
+    title: 'ARUSHA HOSTS REGIONAL GIANTS IN RECORD U15 TOURNAMENT OPENER',
+    tag: 'Gossip / Focus',
+    category: 'Gossip',
+    date: 'June 30, 2026',
+    author: 'Sports Bureau',
+    readTime: '3 min read',
+    excerpt: 'Utricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet.',
+    content: 'The tournament opened in spectacular fashion with 16 simultaneous matches across all complex pitches, highlighting fast-paced pressing football.',
+  },
+  {
+    id: 'top-news-2',
+    title: 'FUTURE STARS CLINCH THRILLING 3-2 DERBY VICTORY AT BRAEBURN',
+    tag: 'Tables / Matchday',
+    category: 'Tables',
+    date: 'June 30, 2026',
+    author: 'Kassim Juma',
+    readTime: '4 min read',
+    excerpt: 'Utricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet.',
+    content: 'In a game characterized by fierce midfield battles, an 88th-minute thunderbolt secured all three points in the local derby.',
+  },
+  {
+    id: 'top-news-3',
+    title: 'GOLDEN BOOT RACE HEATS UP AS JUMA REACHES 6 GOALS IN 3 GAMES',
+    tag: 'European / Scout',
+    category: 'European',
+    date: 'June 30, 2026',
+    author: 'Samson Baraza',
+    readTime: '3 min read',
+    excerpt: 'Utricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet.',
+    content: 'Clinical finishing inside the penalty area has made the young forward the most talked-about player among visiting scouts.',
+  },
+];
+
+export const LATEST_NEWS_ARTICLES: NewsArticle[] = [
+  {
+    id: 'latest-1',
+    title: 'NAIROBI JUNIORS EDGE KAMPALA ELITE ACADEMY IN 5-GOAL THRILLER',
+    tag: 'FA Cup / U15 Elite',
+    category: 'FA Cup',
+    date: 'June 30, 2026',
+    author: 'Dennis Ochieng',
+    readTime: '3 min read',
+    excerpt: 'In anim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus, vivamus elementum.',
+    content: 'An exhilarating match that saw three lead changes ended in favor of the Kenyan visitors following a composed penalty kick finish.',
+  },
+  {
+    id: 'latest-2',
+    title: 'CECAFA CONFIRMS TECHNICAL OBSERVERS & SCOUTING CLINIC IN ARUSHA',
+    tag: 'FA Cup / CECAFA',
+    category: 'FIFA World Cup',
+    date: 'June 30, 2026',
+    author: 'Cecafa Press',
+    readTime: '4 min read',
+    excerpt: 'Utricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet.',
+    content: 'Regional coaches will receive UEFA-certified video analysis tools and match tagging guidelines during the week-long symposium.',
+  },
+  {
+    id: 'latest-3',
+    title: 'U15 GIRLS DIVISION EXPANDS TO 16 ELITE CLUBS FOR RECORD 2026 SHOWDOWN',
+    tag: 'FA Cup / Women',
+    category: 'Women',
+    date: 'June 30, 2026',
+    author: 'Fatuma Hassan',
+    readTime: '3 min read',
+    excerpt: 'Utricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet.',
+    content: 'With record prize money and travel subsidies, the women’s grassroots pathway continues to set regional benchmarks.',
+  },
+];
+

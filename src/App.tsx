@@ -45,6 +45,7 @@ export default function App() {
   const [selectedMatchForAdmin, setSelectedMatchForAdmin] = useState<string | undefined>(undefined);
   const [selectedMatchForCenter, setSelectedMatchForCenter] = useState<Match | null>(null);
   const [isMatchCenterOpen, setIsMatchCenterOpen] = useState<boolean>(false);
+  const [selectedSubCategory, setSelectedSubCategory] = useState<string>('All Posts');
 
   const handleOpenMatchCenter = (match: Match) => {
     setSelectedMatchForCenter(match);
@@ -269,7 +270,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0B0F17] text-slate-100 selection:bg-emerald-500/30 selection:text-emerald-300">
-      {/* 1. Top Navigation Bar */}
+      {/* 1. Top Navigation Bar matching reference double-bar design */}
       <Navbar
         currentTab={currentTab}
         onSelectTab={setCurrentTab}
@@ -278,6 +279,16 @@ export default function App() {
         onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         isAdminAuthenticated={isAdminAuthenticated}
         onLogout={handleLogout}
+        selectedSubCategory={selectedSubCategory}
+        onSubCategorySelect={(cat) => {
+          setSelectedSubCategory(cat);
+          setCurrentTab('home');
+        }}
+        onSearch={(q) => {
+          if (q.trim()) {
+            setCurrentTab('fixtures');
+          }
+        }}
       />
 
       {/* Responsive Mobile Drawer */}
@@ -291,11 +302,13 @@ export default function App() {
         onLogout={handleLogout}
       />
 
-      {/* Live Match Center Ticker */}
-      <LiveTicker
-        matches={matches}
-        onSelectMatch={handleOpenMatchCenter}
-      />
+      {/* Live Match Center Ticker shown on secondary pages */}
+      {currentTab !== 'home' && (
+        <LiveTicker
+          matches={matches}
+          onSelectMatch={handleOpenMatchCenter}
+        />
+      )}
 
       {/* Main View Area */}
       <main className="flex-1">
@@ -314,6 +327,8 @@ export default function App() {
               }
             }}
             isAdminAuthenticated={isAdminAuthenticated}
+            onSelectMatch={handleOpenMatchCenter}
+            selectedCategory={selectedSubCategory}
           />
         )}
 
@@ -323,23 +338,39 @@ export default function App() {
             onSelectMatch={handleOpenMatchCenter}
             onOpenScoreReporter={isAdminAuthenticated ? handleOpenScoreReporter : undefined}
             isAdminAuthenticated={isAdminAuthenticated}
+            onSelectTab={setCurrentTab}
+            standings={standings}
           />
         )}
 
         {currentTab === 'standings' && (
-          <StandingsView standings={standings} />
+          <StandingsView
+            standings={standings}
+            onSelectTab={setCurrentTab}
+          />
         )}
 
         {currentTab === 'brackets' && (
-          <BracketsView onSelectMatch={handleOpenMatchCenter} />
+          <BracketsView
+            onSelectMatch={handleOpenMatchCenter}
+            onSelectTab={setCurrentTab}
+            standings={standings}
+          />
         )}
 
         {currentTab === 'teams' && (
-          <TeamsView teams={teams} />
+          <TeamsView
+            teams={teams}
+            onSelectTab={setCurrentTab}
+            standings={standings}
+          />
         )}
 
         {currentTab === 'stats' && (
-          <StatsView />
+          <StatsView
+            onSelectTab={setCurrentTab}
+            standings={standings}
+          />
         )}
       </main>
 

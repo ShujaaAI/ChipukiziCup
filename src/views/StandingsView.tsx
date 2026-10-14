@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { 
   Trophy, 
-  Info, 
   ChevronRight, 
   Award, 
   CheckCircle2, 
@@ -10,15 +9,22 @@ import {
   TrendingUp,
   BarChart3,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  Info
 } from 'lucide-react';
 import { Standing, TEAMS_DATA } from '../data/tournamentData';
+import { TournamentSidebar } from '../components/TournamentSidebar';
+import { NavigationTab } from '../components/Navbar';
 
 interface StandingsViewProps {
   standings: Standing[];
+  onSelectTab?: (tab: NavigationTab) => void;
 }
 
-export const StandingsView: React.FC<StandingsViewProps> = ({ standings }) => {
+export const StandingsView: React.FC<StandingsViewProps> = ({ 
+  standings,
+  onSelectTab,
+}) => {
   const [selectedGroup, setSelectedGroup] = useState<string>('All');
   const [selectedDivision, setSelectedDivision] = useState<string>('U15');
 
@@ -40,268 +46,265 @@ export const StandingsView: React.FC<StandingsViewProps> = ({ standings }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
-        <div>
-          <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold block mb-1">
-            Official Tournament Tables
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-display">
-            Group Stage Standings
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Top 2 teams from each group earn automatic qualification to the Championship Knockout Stage
-          </p>
-        </div>
+    <div className="bg-[#F8FAFC] text-slate-900 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        
+        {/* Top Breadcrumb & Page Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">
+              <span>Home</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-red-600 font-bold">Standings & Tables</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 font-display uppercase tracking-tight">
+              TOURNAMENT GROUP TABLES
+            </h1>
+          </div>
 
-        {/* Division Selector */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-900 border border-white/10 rounded-xl self-start md:self-auto">
-          {divisions.map((div) => (
-            <button
-              key={div.id}
-              onClick={() => setSelectedDivision(div.id)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                selectedDivision === div.id
-                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {div.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Group Navigation Tabs (Group A, Group B, Group C, Group D) */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-          <span className="text-xs uppercase tracking-wider text-slate-400 font-bold mr-1 shrink-0">
-            Groups:
-          </span>
-          {groups.map((grp) => {
-            const isActive = selectedGroup === grp;
-            return (
+          {/* Division Selector */}
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-lg shadow-2xs self-start sm:self-auto">
+            {divisions.map((div) => (
               <button
-                key={grp}
-                onClick={() => setSelectedGroup(grp)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap border transition-all ${
-                  isActive
-                    ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-950/30'
-                    : 'bg-slate-900/80 text-slate-400 border-white/5 hover:border-white/15 hover:text-white'
+                key={div.id}
+                onClick={() => setSelectedDivision(div.id)}
+                className={`px-3 py-1.5 text-xs font-bold rounded transition-colors cursor-pointer ${
+                  selectedDivision === div.id
+                    ? 'bg-red-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {grp === 'All' ? 'All Groups View' : grp}
+                {div.label}
               </button>
-            );
-          })}
-        </div>
-
-        {/* Qualification Badge Kicker */}
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-            <span>Knockouts (Top 2)</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-amber-400 font-medium">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-            <span>Shield Cup (3rd)</span>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Tables Grid */}
-      <div className="space-y-8">
-        {groupNames.map((grpName) => {
-          const groupTeams = filteredStandings
-            .filter((s) => s.group === grpName)
-            .sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
-
-          const totalGoals = groupTeams.reduce((acc, t) => acc + t.gf, 0);
-
-          return (
-            <div
-              key={grpName}
-              className="rounded-2xl bg-slate-900/70 border border-white/10 overflow-hidden shadow-xl"
-            >
-              {/* Table Header Banner */}
-              <div className="px-6 py-4 bg-slate-950/80 border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                  <h3 className="text-base sm:text-lg font-bold text-white font-display">
-                    {grpName} · {selectedDivision} Boys
-                  </h3>
-                  <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-mono text-slate-400">
-                    Matchday 3 Completed
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-slate-400">
-                  <span className="font-mono">
-                    <strong className="text-emerald-400">{totalGoals}</strong> total goals scored
-                  </span>
-                </div>
+        {/* ========================================================================= */}
+        {/* MAIN 2-COLUMN STRUCTURE MATCHING REFERENCE IMAGE                         */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* ----------------- LEFT COLUMN (8 Cols / 67%) ----------------- */}
+          <div className="lg:col-span-8 space-y-6">
+            
+            {/* Crimson Red Ribbon Banner for Groups Filter */}
+            <div className="bg-[#DC2626] text-white rounded-t-lg px-4 py-2.5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-sm overflow-x-auto">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="font-black text-sm uppercase tracking-wider font-display">
+                  GROUP STAGE TABLES
+                </span>
               </div>
 
-              {/* Table Data */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-white/10 text-slate-400 bg-black/30 font-bold uppercase tracking-wider text-[11px]">
-                      <th className="py-3.5 px-4 w-12 text-center">Pos</th>
-                      <th className="py-3.5 px-4 min-w-[200px]">Team</th>
-                      <th className="py-3.5 px-3 text-center" title="Matches Played">P</th>
-                      <th className="py-3.5 px-3 text-center" title="Won">W</th>
-                      <th className="py-3.5 px-3 text-center" title="Drawn">D</th>
-                      <th className="py-3.5 px-3 text-center" title="Lost">L</th>
-                      <th className="py-3.5 px-3 text-center" title="Goals For">GF</th>
-                      <th className="py-3.5 px-3 text-center" title="Goals Against">GA</th>
-                      <th className="py-3.5 px-3 text-center" title="Goal Difference">GD</th>
-                      <th className="py-3.5 px-4 text-center font-bold text-emerald-400 bg-emerald-500/5" title="Points">Pts</th>
-                      <th className="py-3.5 px-6 text-center min-w-[150px]" title="Form in last 5 matches">Form Guide</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {groupTeams.map((team, idx) => {
-                      const pos = idx + 1;
-                      const isKnockout = pos <= 2;
-                      const isShield = pos === 3;
-                      const teamInfo = getTeamInfo(team.team);
-
-                      return (
-                        <tr
-                          key={team.team}
-                          className={`transition-colors group ${
-                            isKnockout
-                              ? 'bg-emerald-950/10 hover:bg-emerald-900/20'
-                              : 'hover:bg-white/5'
-                          }`}
-                        >
-                          {/* Position with Color-coded Qualification Marker */}
-                          <td className="py-3.5 px-4 text-center font-mono font-bold">
-                            <span
-                              className={`inline-flex items-center justify-center w-6 h-6 rounded-md font-bold text-xs ${
-                                isKnockout
-                                  ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
-                                  : isShield
-                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                                  : 'text-slate-400 bg-white/5'
-                              }`}
-                            >
-                              {pos}
-                            </span>
-                          </td>
-
-                          {/* Team Name & Crest */}
-                          <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-7 h-7 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center text-sm shrink-0">
-                                {teamInfo?.flag || '⚽'}
-                              </div>
-
-                              <div className="min-w-0">
-                                <div className="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-300 transition-colors flex items-center gap-2">
-                                  <span className="truncate">{team.team}</span>
-                                  {isKnockout && (
-                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold">
-                                      Q
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-[10px] text-slate-400 truncate">
-                                  {teamInfo ? `${teamInfo.city}, ${teamInfo.country}` : 'East Africa Academy'}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Stats: P, W, D, L, GF, GA, GD, Pts */}
-                          <td className="py-3.5 px-3 text-center font-mono text-slate-300 tabular-nums">
-                            {team.mp}
-                          </td>
-                          <td className="py-3.5 px-3 text-center font-mono text-slate-300 tabular-nums">
-                            {team.w}
-                          </td>
-                          <td className="py-3.5 px-3 text-center font-mono text-slate-300 tabular-nums">
-                            {team.d}
-                          </td>
-                          <td className="py-3.5 px-3 text-center font-mono text-slate-300 tabular-nums">
-                            {team.l}
-                          </td>
-                          <td className="py-3.5 px-3 text-center font-mono text-slate-400 tabular-nums">
-                            {team.gf}
-                          </td>
-                          <td className="py-3.5 px-3 text-center font-mono text-slate-400 tabular-nums">
-                            {team.ga}
-                          </td>
-                          <td className="py-3.5 px-3 text-center font-mono font-bold tabular-nums text-slate-200">
-                            {team.gd > 0 ? `+${team.gd}` : team.gd}
-                          </td>
-                          <td className="py-3.5 px-4 text-center font-mono font-black text-sm text-emerald-400 tabular-nums bg-emerald-500/5">
-                            {team.pts}
-                          </td>
-
-                          {/* Form Guide (Last 5 matches with W, D, L colored badges) */}
-                          <td className="py-3.5 px-6 text-center">
-                            <div className="flex items-center justify-center gap-1.5">
-                              {team.form.map((res, fIdx) => {
-                                const isWin = res === 'W';
-                                const isDraw = res === 'D';
-                                const isLoss = res === 'L';
-
-                                return (
-                                  <span
-                                    key={fIdx}
-                                    title={`Match ${fIdx + 1}: ${isWin ? 'Win' : isDraw ? 'Draw' : 'Loss'}`}
-                                    className={`w-5 h-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold shadow-sm ${
-                                      isWin
-                                        ? 'bg-emerald-500 text-slate-950 font-black'
-                                        : isDraw
-                                        ? 'bg-slate-700 text-slate-200'
-                                        : 'bg-rose-600 text-white'
-                                    }`}
-                                  >
-                                    {res}
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+              {/* Group Tabs */}
+              <div className="flex items-center gap-2 sm:gap-4 text-xs font-medium whitespace-nowrap overflow-x-auto no-scrollbar">
+                {groups.map((grp) => (
+                  <button
+                    key={grp}
+                    onClick={() => setSelectedGroup(grp)}
+                    className={`transition-colors py-0.5 cursor-pointer ${
+                      selectedGroup === grp
+                        ? 'text-white font-extrabold underline underline-offset-4'
+                        : 'text-red-100 hover:text-white'
+                    }`}
+                  >
+                    {grp === 'All' ? 'All Groups' : grp}
+                  </button>
+                ))}
               </div>
-
-              {/* Table Footer: Legend & Rules */}
-              <div className="px-6 py-3.5 bg-black/40 border-t border-white/5 flex flex-wrap items-center justify-between gap-4 text-[11px] text-slate-400">
-                <div className="flex flex-wrap items-center gap-6">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                    <span>Positions 1–2: Qualify for Cup Quarter-Finals</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                    <span>Position 3: Advances to Shield Cup Semi-Finals</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-slate-600" />
-                    <span>Position 4: Placement Consolation Matches</span>
-                  </div>
-                </div>
-
-                <div className="text-slate-500 font-mono text-[10px]">
-                  Tiebreakers: PTS &gt; GD &gt; GF &gt; Head-to-Head &gt; Fair Play
-                </div>
-              </div>
-
             </div>
-          );
-        })}
-      </div>
 
+            {/* Standings Group Tables List */}
+            <div className="space-y-6">
+              {groupNames.map((grpName) => {
+                const groupTeams = filteredStandings
+                  .filter((s) => s.group === grpName)
+                  .sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+
+                return (
+                  <div 
+                    key={grpName} 
+                    className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs"
+                  >
+                    {/* Header Bar for Group */}
+                    <div className="bg-[#111827] text-white px-4 py-3 flex items-center justify-between border-l-4 border-red-600">
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-sm uppercase tracking-wider font-display">
+                          {grpName}
+                        </span>
+                        <span className="text-slate-400">·</span>
+                        <span className="text-xs text-slate-300 font-medium">
+                          {selectedDivision === 'U15' ? 'U15 Boys Cup' : selectedDivision === 'U17' ? 'U17 Boys' : 'Girls Cup'}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-amber-400 font-mono font-bold">
+                        Top 2 Qualify to Quarter-Finals
+                      </span>
+                    </div>
+
+                    {/* Table */}
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs text-left">
+                        <thead>
+                          <tr className="bg-slate-50 text-[11px] font-bold uppercase text-slate-500 border-b border-slate-200">
+                            <th className="py-2.5 pl-4 w-10">POS</th>
+                            <th className="py-2.5">TEAM / ACADEMY</th>
+                            <th className="py-2.5 text-center w-9">MP</th>
+                            <th className="py-2.5 text-center w-9">W</th>
+                            <th className="py-2.5 text-center w-9">D</th>
+                            <th className="py-2.5 text-center w-9">L</th>
+                            <th className="py-2.5 text-center w-10 hidden sm:table-cell">GF</th>
+                            <th className="py-2.5 text-center w-10 hidden sm:table-cell">GA</th>
+                            <th className="py-2.5 text-center w-10">GD</th>
+                            <th className="py-2.5 text-right pr-4 w-12 font-black text-slate-900">PTS</th>
+                            <th className="py-2.5 text-center w-24 hidden md:table-cell">FORM</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 text-slate-700">
+                          {groupTeams.map((s, idx) => {
+                            const teamInfo = getTeamInfo(s.team);
+                            const isChampionship = idx < 2;
+                            const isShield = idx === 2;
+
+                            return (
+                              <tr 
+                                key={s.team}
+                                className={`hover:bg-slate-50 transition-colors ${
+                                  isChampionship ? 'bg-emerald-50/20' : ''
+                                }`}
+                              >
+                                {/* Position */}
+                                <td className="py-3 pl-4 font-mono font-bold">
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${
+                                      isChampionship ? 'bg-emerald-500' : isShield ? 'bg-amber-400' : 'bg-slate-300'
+                                    }`} />
+                                    <span className={isChampionship ? 'text-slate-900 font-black' : 'text-slate-600'}>
+                                      {idx + 1}
+                                    </span>
+                                  </div>
+                                </td>
+
+                                {/* Team Name & Badge */}
+                                <td className="py-3 font-semibold text-slate-900">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="text-base shrink-0">
+                                      {teamInfo?.flag || '⚽'}
+                                    </span>
+                                    <span className="font-extrabold truncate max-w-[170px] sm:max-w-none">
+                                      {s.team}
+                                    </span>
+                                  </div>
+                                </td>
+
+                                <td className="py-3 text-center font-mono text-slate-600 font-medium">{s.mp}</td>
+                                <td className="py-3 text-center font-mono text-slate-600">{s.w}</td>
+                                <td className="py-3 text-center font-mono text-slate-600">{s.d}</td>
+                                <td className="py-3 text-center font-mono text-slate-600">{s.l}</td>
+                                <td className="py-3 text-center font-mono text-slate-500 hidden sm:table-cell">{s.gf}</td>
+                                <td className="py-3 text-center font-mono text-slate-500 hidden sm:table-cell">{s.ga}</td>
+                                <td className="py-3 text-center font-mono font-semibold text-slate-700">
+                                  {s.gd > 0 ? `+${s.gd}` : s.gd}
+                                </td>
+                                
+                                {/* Points */}
+                                <td className="py-3 text-right pr-4 font-mono font-black text-sm text-slate-900">
+                                  {s.pts}
+                                </td>
+
+                                {/* Form Guide */}
+                                <td className="py-3 text-center hidden md:table-cell">
+                                  <div className="flex items-center justify-center gap-1">
+                                    {s.form && s.form.length > 0 ? (
+                                      s.form.slice(-3).map((f, i) => (
+                                        <span
+                                          key={i}
+                                          className={`w-5 h-5 rounded-full text-[10px] font-mono font-black flex items-center justify-center ${
+                                            f === 'W'
+                                              ? 'bg-emerald-600 text-white'
+                                              : f === 'D'
+                                              ? 'bg-amber-400 text-slate-950'
+                                              : 'bg-red-500 text-white'
+                                          }`}
+                                        >
+                                          {f}
+                                        </span>
+                                      ))
+                                    ) : (
+                                      <span className="text-slate-300 font-mono">-</span>
+                                    )}
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Footer footnote */}
+                    <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                      <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span>Cup Knockouts (Rank 1-2)</span>
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-400" />
+                          <span>Shield Knockouts (Rank 3)</span>
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-slate-400">
+                        Official CECAFA Tiebreakers Apply
+                      </span>
+                    </div>
+
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Tournament Rules / Scoring Breakdown Card */}
+            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs space-y-3">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-red-600" />
+                <h3 className="font-extrabold text-sm uppercase tracking-wide text-slate-900 font-display">
+                  Tournament Scoring & Ranking Rules
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Teams receive 3 points for a win, 1 point for a draw, and 0 for a loss. In the event of a tie in points at the end of the group stage, placement is determined by:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                <div className="p-2.5 rounded bg-slate-50 border border-slate-100">
+                  <span className="font-bold text-slate-800 block mb-0.5">1. Goal Difference (GD)</span>
+                  <span className="text-slate-500 text-[11px]">Superior difference between goals scored and conceded.</span>
+                </div>
+                <div className="p-2.5 rounded bg-slate-50 border border-slate-100">
+                  <span className="font-bold text-slate-800 block mb-0.5">2. Goals For (GF)</span>
+                  <span className="text-slate-500 text-[11px]">Total number of goals scored across all group matches.</span>
+                </div>
+                <div className="p-2.5 rounded bg-slate-50 border border-slate-100">
+                  <span className="font-bold text-slate-800 block mb-0.5">3. Head-to-Head</span>
+                  <span className="text-slate-500 text-[11px]">Result between tied teams during their direct match.</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* ----------------- RIGHT COLUMN (SIDEBAR, 4 Cols / 33%) ----------------- */}
+          <div className="lg:col-span-4">
+            <TournamentSidebar
+              standings={standings}
+              showTopScorersInstead={true}
+              onSelectTab={onSelectTab}
+            />
+          </div>
+
+        </div>
+
+      </div>
     </div>
   );
 };

@@ -14,7 +14,10 @@ import {
   Crown
 } from 'lucide-react';
 import trophyImg from '../assets/images/chipkizi_trophy_showcase_1790842762275.jpg';
-import { Match } from '../data/tournamentData';
+import playerSpotlightImg from '../assets/images/chipkizi_player_spotlight_1791989031130.jpg';
+import { Match, Standing } from '../data/tournamentData';
+import { TournamentSidebar } from '../components/TournamentSidebar';
+import { NavigationTab } from '../components/Navbar';
 
 interface BracketMatch {
   id: string;
@@ -43,12 +46,16 @@ interface BracketMatch {
 
 interface BracketsViewProps {
   onSelectMatch?: (match: Match) => void;
+  onSelectTab?: (tab: NavigationTab) => void;
+  standings?: Standing[];
 }
 
-export const BracketsView: React.FC<BracketsViewProps> = ({ onSelectMatch }) => {
+export const BracketsView: React.FC<BracketsViewProps> = ({ 
+  onSelectMatch,
+  onSelectTab,
+  standings = [],
+}) => {
   const [selectedDivision, setSelectedDivision] = useState<string>('U15');
-
-  // Interactive state: Hovered team to highlight bracket path
   const [hoveredTeam, setHoveredTeam] = useState<string | null>(null);
 
   const quarterFinals: BracketMatch[] = [
@@ -130,10 +137,10 @@ export const BracketsView: React.FC<BracketsViewProps> = ({ onSelectMatch }) => 
     matchNum: 'GRAND FINAL',
     date: 'Sunday Afternoon',
     time: '15:30 EAT',
-    pitch: 'Sheikh Amri Abeid National Stadium',
+    pitch: 'Sheikh Amri Abeid Stadium',
     status: 'UPCOMING',
-    homeTeam: { name: 'Winner Semi-Final 1', flag: '🏆' },
-    awayTeam: { name: 'Winner Semi-Final 2', flag: '🏆' },
+    homeTeam: { name: 'Winner SF 1 (TBD)', flag: '🏆' },
+    awayTeam: { name: 'Winner SF 2 (TBD)', flag: '🏆' },
   };
 
   const thirdPlace: BracketMatch = {
@@ -161,7 +168,7 @@ export const BracketsView: React.FC<BracketsViewProps> = ({ onSelectMatch }) => 
         homeScore: bm.homeTeam.score,
         awayScore: bm.awayTeam.score,
         status: bm.status,
-        minute: bm.minute || (bm.status === 'FINISHED' ? 'FT' : undefined),
+        minute: bm.minute,
         date: bm.date,
         time: bm.time,
         pitch: bm.pitch,
@@ -170,323 +177,305 @@ export const BracketsView: React.FC<BracketsViewProps> = ({ onSelectMatch }) => 
     }
   };
 
-  const isTeamHighlighted = (teamName: string) => {
-    if (!hoveredTeam) return false;
-    return teamName.toLowerCase().includes(hoveredTeam.toLowerCase());
+  const renderTeamRow = (team: BracketMatch['homeTeam'], isHome: boolean, isFinished: boolean) => {
+    const isHovered = hoveredTeam && hoveredTeam === team.name;
+    return (
+      <div 
+        onMouseEnter={() => setHoveredTeam(team.name)}
+        onMouseLeave={() => setHoveredTeam(null)}
+        className={`flex items-center justify-between px-3 py-2 text-xs transition-colors ${
+          team.isWinner ? 'bg-emerald-50/50 font-bold' : ''
+        } ${isHovered ? 'bg-red-50 text-red-700' : ''}`}
+      >
+        <div className="flex items-center gap-2 truncate pr-2">
+          <span className="text-sm shrink-0">{team.flag}</span>
+          <span className={`truncate ${team.isWinner ? 'font-extrabold text-slate-900' : 'text-slate-700'}`}>
+            {team.name}
+          </span>
+          {team.isWinner && (
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0 inline ml-0.5" />
+          )}
+        </div>
+        <div className="font-mono font-black text-sm shrink-0">
+          {team.score !== undefined ? (
+            <span className={team.isWinner ? 'text-slate-900' : 'text-slate-500'}>
+              {team.score}
+            </span>
+          ) : (
+            <span className="text-slate-300">-</span>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
-      {/* View Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
-        <div>
-          <span className="text-xs uppercase tracking-wider text-emerald-400 font-bold block mb-1">
-            Championship Ladder & Road to the Final
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-display">
-            Knockout Stage Brackets
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Single elimination bracket from Quarter-Finals to the Grand Final at Sheikh Amri Abeid Stadium
-          </p>
-        </div>
-
-        {/* Division Selector */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-900 border border-white/10 rounded-xl self-start md:self-auto">
-          {['U15', 'U17', 'Girls'].map((div) => (
-            <button
-              key={div}
-              onClick={() => setSelectedDivision(div)}
-              className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                selectedDivision === div
-                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {div === 'Girls' ? 'Girls U17 Cup' : `${div} Boys Division`}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Bracket Tree Canvas */}
-      <div className="rounded-3xl bg-slate-950/80 border border-white/10 p-6 lg:p-8 overflow-x-auto shadow-2xl relative">
+    <div className="bg-[#F8FAFC] text-slate-900 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         
-        {/* Ambient Trophy Glow */}
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+        {/* Top Breadcrumb & Page Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">
+              <span>Home</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-red-600 font-bold">Knockout Brackets</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 font-display uppercase tracking-tight">
+              CHAMPIONSHIP KNOCKOUT BRACKET
+            </h1>
+          </div>
 
-        <div className="min-w-[960px] grid grid-cols-12 gap-6 items-center relative z-10">
+          {/* Division Selector */}
+          <div className="flex items-center gap-1.5 p-1 bg-white border border-slate-200 rounded-lg shadow-2xs self-start sm:self-auto">
+            {['U15', 'U17', 'Girls'].map((div) => (
+              <button
+                key={div}
+                onClick={() => setSelectedDivision(div)}
+                className={`px-3 py-1.5 text-xs font-bold rounded transition-colors cursor-pointer ${
+                  selectedDivision === div
+                    ? 'bg-red-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {div === 'U15' ? 'U15 Boys Cup' : div === 'U17' ? 'U17 Boys' : 'Girls Cup'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ========================================================================= */}
+        {/* MAIN 2-COLUMN STRUCTURE MATCHING REFERENCE IMAGE                         */}
+        {/* ========================================================================= */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* ================= COLUMN 1: QUARTER-FINALS (4 cols) ================= */}
-          <div className="col-span-4 space-y-6">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-display">
-                Quarter-Finals (Saturday)
-              </span>
-              <span className="text-[11px] text-emerald-400 font-mono font-semibold">
-                Completed
-              </span>
-            </div>
-
-            <div className="space-y-4">
-              {quarterFinals.map((match) => (
-                <div
-                  key={match.id}
-                  onClick={() => handleMatchClick(match)}
-                  className="p-3.5 rounded-2xl bg-slate-900/90 border border-white/10 hover:border-emerald-500/40 transition-all cursor-pointer group shadow-md"
-                >
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pb-2 border-b border-white/5">
-                    <span className="font-semibold text-slate-300 font-mono">{match.matchNum}</span>
-                    <span className="font-mono text-emerald-400 font-semibold">{match.pitch.split('·')[0]}</span>
-                  </div>
-
-                  <div className="space-y-1.5 py-2">
-                    {/* Home Team */}
-                    <div
-                      onMouseEnter={() => setHoveredTeam(match.homeTeam.name)}
-                      onMouseLeave={() => setHoveredTeam(null)}
-                      className={`flex items-center justify-between p-2 rounded-xl transition-all ${
-                        match.homeTeam.isWinner
-                          ? 'bg-emerald-500/10 border border-emerald-500/30'
-                          : 'bg-black/20 text-slate-400'
-                      } ${isTeamHighlighted(match.homeTeam.name) ? 'ring-1 ring-emerald-400' : ''}`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-sm">{match.homeTeam.flag}</span>
-                        <span className={`text-xs font-bold truncate ${match.homeTeam.isWinner ? 'text-white' : 'text-slate-400'}`}>
-                          {match.homeTeam.name}
-                        </span>
-                      </div>
-                      <span className={`font-mono font-bold text-sm px-1.5 ${match.homeTeam.isWinner ? 'text-emerald-400' : 'text-slate-500'}`}>
-                        {match.homeTeam.score}
-                      </span>
-                    </div>
-
-                    {/* Away Team */}
-                    <div
-                      onMouseEnter={() => setHoveredTeam(match.awayTeam.name)}
-                      onMouseLeave={() => setHoveredTeam(null)}
-                      className={`flex items-center justify-between p-2 rounded-xl transition-all ${
-                        match.awayTeam.isWinner
-                          ? 'bg-emerald-500/10 border border-emerald-500/30'
-                          : 'bg-black/20 text-slate-400'
-                      } ${isTeamHighlighted(match.awayTeam.name) ? 'ring-1 ring-emerald-400' : ''}`}
-                    >
-                      <div className="flex items-center gap-2 truncate">
-                        <span className="text-sm">{match.awayTeam.flag}</span>
-                        <span className={`text-xs font-bold truncate ${match.awayTeam.isWinner ? 'text-white' : 'text-slate-400'}`}>
-                          {match.awayTeam.name}
-                        </span>
-                      </div>
-                      <span className={`font-mono font-bold text-sm px-1.5 ${match.awayTeam.isWinner ? 'text-emerald-400' : 'text-slate-500'}`}>
-                        {match.awayTeam.score}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-[10px] text-right text-slate-500 font-mono">
-                    Full Time · Click for Match Center →
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* ================= COLUMN 2: SEMI-FINALS (4 cols) ================= */}
-          <div className="col-span-4 space-y-12">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300 font-display">
-                Semi-Finals (Sunday AM)
-              </span>
-              <span className="text-[11px] text-amber-400 font-mono font-semibold">
-                Semi-Final Sunday
-              </span>
-            </div>
-
-            <div className="space-y-10">
-              {semiFinals.map((match) => {
-                const isLive = match.status === 'LIVE';
-
-                return (
-                  <div
-                    key={match.id}
-                    onClick={() => handleMatchClick(match)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-lg ${
-                      isLive
-                        ? 'bg-gradient-to-br from-[#152338] to-slate-900 border-emerald-500/50 shadow-emerald-950/40 hover:border-emerald-400'
-                        : 'bg-slate-900/90 border-white/15 hover:border-white/25'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pb-2 border-b border-white/5">
-                      <span className="font-semibold text-white font-mono">{match.matchNum}</span>
-                      {isLive ? (
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold font-mono text-[10px] animate-pulse">
-                          LIVE {match.minute}
-                        </span>
-                      ) : (
-                        <span className="font-mono text-amber-400">{match.time}</span>
-                      )}
-                    </div>
-
-                    <div className="space-y-2 py-2.5">
-                      {/* Home */}
-                      <div
-                        onMouseEnter={() => setHoveredTeam(match.homeTeam.name)}
-                        onMouseLeave={() => setHoveredTeam(null)}
-                        className={`flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 transition-all ${
-                          isTeamHighlighted(match.homeTeam.name) ? 'ring-1 ring-emerald-400 bg-emerald-500/10' : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="text-base">{match.homeTeam.flag}</span>
-                          <span className="text-xs font-bold text-white truncate">
-                            {match.homeTeam.name}
-                          </span>
-                        </div>
-                        <span className="font-mono font-bold text-sm text-white px-1.5">
-                          {match.homeTeam.score !== undefined ? match.homeTeam.score : '-'}
-                        </span>
-                      </div>
-
-                      {/* Away */}
-                      <div
-                        onMouseEnter={() => setHoveredTeam(match.awayTeam.name)}
-                        onMouseLeave={() => setHoveredTeam(null)}
-                        className={`flex items-center justify-between p-2.5 rounded-xl bg-black/40 border border-white/5 transition-all ${
-                          isTeamHighlighted(match.awayTeam.name) ? 'ring-1 ring-emerald-400 bg-emerald-500/10' : ''
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="text-base">{match.awayTeam.flag}</span>
-                          <span className="text-xs font-bold text-white truncate">
-                            {match.awayTeam.name}
-                          </span>
-                        </div>
-                        <span className="font-mono font-bold text-sm text-white px-1.5">
-                          {match.awayTeam.score !== undefined ? match.awayTeam.score : '-'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                      <span className="truncate max-w-[160px]">{match.pitch.split('·')[0]}</span>
-                      <span className="text-emerald-400 group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-                        Match Center →
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ================= COLUMN 3: GRAND FINAL & 3RD PLACE (4 cols) ================= */}
-          <div className="col-span-4 space-y-6">
+          {/* ----------------- LEFT COLUMN (8 Cols / 67%) ----------------- */}
+          <div className="lg:col-span-8 space-y-6">
             
-            {/* Grand Final Trophy Card */}
-            <div>
-              <div className="flex items-center justify-between border-b border-amber-500/30 pb-2 mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5 font-display">
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  Grand Final (15:30 EAT)
+            {/* Crimson Red Ribbon Banner for Knockout Tree */}
+            <div className="bg-[#DC2626] text-white rounded-t-lg px-4 py-2.5 flex items-center justify-between shadow-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-sm uppercase tracking-wider font-display">
+                  ROAD TO THE FINAL
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">
-                  Azam TV LIVE
+                <span className="text-red-200 text-xs">·</span>
+                <span className="text-xs font-bold text-red-100">
+                  {selectedDivision === 'U15' ? 'U15 Boys' : selectedDivision === 'U17' ? 'U17 Boys' : 'Girls'} Division
                 </span>
               </div>
+              <span className="text-xs font-mono text-white/90">
+                Single Elimination
+              </span>
+            </div>
 
-              <div
-                onClick={() => handleMatchClick(grandFinal)}
-                className="p-5 rounded-3xl bg-gradient-to-br from-amber-500/15 via-[#182338] to-slate-900 border-2 border-amber-500/50 hover:border-amber-400 transition-all cursor-pointer group shadow-2xl relative overflow-hidden"
-              >
-                {/* Trophy showcase header thumbnail */}
-                <div className="relative rounded-2xl overflow-hidden h-28 mb-4 border border-white/10 shadow-inner">
-                  <img
-                    src={trophyImg}
-                    alt="Chipkizi Cup Grand Final Official Championship Trophy"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover filter contrast-125 group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-3">
-                    <span className="text-xs font-black text-amber-300 uppercase tracking-widest font-display flex items-center gap-1.5">
-                      <Crown className="w-4 h-4 text-amber-400" />
-                      Chipkizi Cup Champion
-                    </span>
-                    <span className="text-[10px] text-slate-300">
-                      Sheikh Amri Abeid Stadium
-                    </span>
+            {/* Bracket Tree Container */}
+            <div className="bg-white border border-slate-200 rounded-b-lg p-4 sm:p-6 shadow-xs overflow-x-auto">
+              <div className="min-w-[700px] grid grid-cols-3 gap-6 items-center">
+                
+                {/* 1. QUARTER-FINALS COLUMN */}
+                <div className="space-y-4">
+                  <div className="bg-[#111827] text-white px-3 py-1.5 rounded text-center font-extrabold text-xs uppercase tracking-wider">
+                    Quarter-Finals
+                  </div>
+
+                  <div className="space-y-4">
+                    {quarterFinals.map((bm) => (
+                      <div
+                        key={bm.id}
+                        onClick={() => handleMatchClick(bm)}
+                        className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs hover:shadow-md hover:border-red-400 transition-all cursor-pointer"
+                      >
+                        <div className="bg-slate-50 px-3 py-1 border-b border-slate-100 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                          <span>{bm.matchNum}</span>
+                          <span>{bm.pitch.split('·')[0]}</span>
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                          {renderTeamRow(bm.homeTeam, true, bm.status === 'FINISHED')}
+                          {renderTeamRow(bm.awayTeam, false, bm.status === 'FINISHED')}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="space-y-2 py-1">
-                  <div className="p-3 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">🇹🇿</span>
-                      <span className="text-xs font-bold text-white">Winner Semi-Final 1</span>
-                    </div>
-                    <span className="font-mono text-slate-400 font-bold text-sm">-</span>
+                {/* 2. SEMI-FINALS COLUMN */}
+                <div className="space-y-8">
+                  <div className="bg-[#111827] text-white px-3 py-1.5 rounded text-center font-extrabold text-xs uppercase tracking-wider">
+                    Semi-Finals
                   </div>
 
-                  <div className="p-3 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">🇹🇿</span>
-                      <span className="text-xs font-bold text-white">Winner Semi-Final 2</span>
-                    </div>
-                    <span className="font-mono text-slate-400 font-bold text-sm">-</span>
+                  <div className="space-y-12">
+                    {semiFinals.map((bm) => (
+                      <div
+                        key={bm.id}
+                        onClick={() => handleMatchClick(bm)}
+                        className={`border rounded-lg overflow-hidden bg-white shadow-2xs hover:shadow-md transition-all cursor-pointer ${
+                          bm.status === 'LIVE' ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200 hover:border-red-400'
+                        }`}
+                      >
+                        <div className={`px-3 py-1 border-b flex items-center justify-between text-[10px] font-bold ${
+                          bm.status === 'LIVE' ? 'bg-red-600 text-white' : 'bg-slate-50 text-slate-500 border-slate-100'
+                        }`}>
+                          <span>{bm.matchNum}</span>
+                          {bm.status === 'LIVE' ? (
+                            <span className="uppercase tracking-wider animate-pulse">
+                              LIVE {bm.minute}
+                            </span>
+                          ) : (
+                            <span>{bm.time}</span>
+                          )}
+                        </div>
+                        <div className="divide-y divide-slate-100">
+                          {renderTeamRow(bm.homeTeam, true, bm.status === 'FINISHED')}
+                          {renderTeamRow(bm.awayTeam, false, bm.status === 'FINISHED')}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-amber-500/20 text-center text-xs font-semibold text-amber-300 flex items-center justify-center gap-1">
-                  <span>Match Details & Broadcast Link</span>
-                  <ChevronRight className="w-4 h-4" />
+                {/* 3. GRAND FINAL COLUMN */}
+                <div className="space-y-6">
+                  <div className="bg-red-600 text-white px-3 py-1.5 rounded text-center font-black text-xs uppercase tracking-wider shadow-xs">
+                    Grand Final
+                  </div>
+
+                  {/* Grand Final Card */}
+                  <div
+                    onClick={() => handleMatchClick(grandFinal)}
+                    className="border-2 border-amber-500/60 rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 px-3 py-1.5 flex items-center justify-between text-[11px] font-black uppercase tracking-wider">
+                      <span className="flex items-center gap-1">
+                        <Trophy className="w-3.5 h-3.5" />
+                        CHAMPIONSHIP FINAL
+                      </span>
+                      <span>15:30 EAT</span>
+                    </div>
+
+                    <div className="p-3 text-center bg-slate-50 border-b border-slate-100">
+                      <div className="text-[11px] font-bold text-slate-800">
+                        Sheikh Amri Abeid Stadium
+                      </div>
+                      <div className="text-[10px] text-slate-500">
+                        Official Uhlsport Match Ball
+                      </div>
+                    </div>
+
+                    <div className="divide-y divide-slate-100">
+                      {renderTeamRow(grandFinal.homeTeam, true, false)}
+                      {renderTeamRow(grandFinal.awayTeam, false, false)}
+                    </div>
+                  </div>
+
+                  {/* 3rd Place Match Card */}
+                  <div className="pt-2">
+                    <div className="text-[11px] font-bold uppercase text-slate-400 text-center mb-1.5">
+                      3rd Place Playoff
+                    </div>
+                    <div
+                      onClick={() => handleMatchClick(thirdPlace)}
+                      className="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs hover:border-slate-300 transition-all cursor-pointer"
+                    >
+                      <div className="bg-slate-50 px-3 py-1 border-b border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+                        <span>BRONZE MEDAL</span>
+                        <span>13:15 EAT</span>
+                      </div>
+                      <div className="divide-y divide-slate-100">
+                        {renderTeamRow(thirdPlace.homeTeam, true, false)}
+                        {renderTeamRow(thirdPlace.awayTeam, false, false)}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+
+            {/* Stadium & Pitch Venues Guide Card */}
+            <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-xs space-y-3">
+              <div className="bg-[#111827] text-white px-3 py-2 rounded flex items-center justify-between border-l-4 border-red-600">
+                <span className="font-extrabold text-xs uppercase tracking-wider font-display">
+                  Official Finals Day Match Locations
+                </span>
+                <span className="text-[10px] text-slate-400">Arusha, Tanzania</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+                <div className="p-3 rounded bg-slate-50 border border-slate-100 space-y-1">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-red-500" />
+                    <span>Sheikh Amri Abeid</span>
+                  </div>
+                  <div className="text-slate-500 text-[11px]">
+                    20,000 Capacity Stadium · Grand Finals Arena
+                  </div>
+                </div>
+                <div className="p-3 rounded bg-slate-50 border border-slate-100 space-y-1">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-red-500" />
+                    <span>TGT Grounds</span>
+                  </div>
+                  <div className="text-slate-500 text-[11px]">
+                    Pitch 1, 2, 3 & 4 · Quarter & Semi-Finals
+                  </div>
+                </div>
+                <div className="p-3 rounded bg-slate-50 border border-slate-100 space-y-1">
+                  <div className="font-bold text-slate-900 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-red-500" />
+                    <span>Braeburn Arusha</span>
+                  </div>
+                  <div className="text-slate-500 text-[11px]">
+                    Main Pitch · Shield & Youth Plate Knockouts
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* 3rd Place Bronze Playoff Card */}
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 border-b border-white/10 pb-1.5 mb-2.5">
-                3rd Place Playoff (Bronze Medal)
+          </div>
+
+          {/* ----------------- RIGHT COLUMN (SIDEBAR, 4 Cols / 33%) ----------------- */}
+          <div className="lg:col-span-4 space-y-6">
+            
+            {/* TROPHY SHOWCASE SPOTLIGHT WIDGET */}
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-xs">
+              <div className="bg-[#111827] text-white px-4 py-2.5 flex items-center justify-between border-l-4 border-amber-500">
+                <span className="font-black text-xs sm:text-sm uppercase tracking-wider font-display flex items-center gap-1.5 text-amber-400">
+                  <Trophy className="w-4 h-4" />
+                  CHIPKIZI CUP TROPHY
+                </span>
+                <span className="text-[10px] text-slate-400">2026 Edition</span>
               </div>
-              <div
-                onClick={() => handleMatchClick(thirdPlace)}
-                className="p-3.5 rounded-2xl bg-slate-900/80 border border-white/10 hover:border-white/20 transition-all cursor-pointer text-xs"
-              >
-                <div className="flex items-center justify-between text-slate-400 pb-1.5 text-[11px]">
-                  <span>Sunday 13:15 · Pitch 1</span>
-                  <span className="font-mono text-amber-400 font-semibold">Bronze Medal</span>
-                </div>
-                <div className="text-slate-200 font-medium">
-                  Runner-up SF 1 vs Runner-up SF 2
+
+              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+                <img
+                  src={trophyImg}
+                  alt="Official Chipkizi Cup Gold Trophy"
+                  className="w-full h-full object-cover filter brightness-95"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <div className="absolute bottom-3 left-3 right-3 text-white">
+                  <div className="text-xs font-black uppercase tracking-tight text-amber-300">
+                    East Africa's Premier Youth Trophy
+                  </div>
+                  <div className="text-[10px] text-slate-200">
+                    Hand-crafted 24k gold leaf cup presented to the Champions
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Reusable Tournament Sidebar */}
+            <TournamentSidebar
+              standings={standings}
+              onSelectTab={onSelectTab}
+            />
 
           </div>
 
         </div>
 
       </div>
-
-      {/* Bracket Pathway Legend */}
-      <div className="p-4 rounded-2xl bg-slate-900/60 border border-white/5 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
-        <div className="flex items-center gap-3">
-          <span className="font-bold text-white">Knockout Rules:</span>
-          <span>90 min regular time · Direct to Penalty Shootout in case of draw</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>Green Border: Qualified / Advanced</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-amber-400">
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            <span>Gold Badge: Championship Match</span>
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 };
